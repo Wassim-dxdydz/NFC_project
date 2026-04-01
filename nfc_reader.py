@@ -8,6 +8,7 @@ def read_nfc_tag():
     '''
     Scans for an NFC tag and returns its UID as a string. If no tag is present, it returns "WAITING".
     '''
+
     try:
         available_readers = readers()
         if not available_readers:
