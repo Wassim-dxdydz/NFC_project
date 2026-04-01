@@ -36,5 +36,5 @@ if __name__ == "__main__":
                 print(f"New NFC tag detected: {result}\n")
                 last_uid = result
         elif result is None:
-            time.sleep(2)
-        time.sleep(1)
+            time.sleep(2) # C'est pour éviter '''UN PEU''' de spammer la console avec Waiting, on peut ajuster ce délai selon les besoins
+        time.sleep(1) # Ceci est pour minimiser l'utilisation du CPU, on peut aussi ajuster ce délai selon les besoins
