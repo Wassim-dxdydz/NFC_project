@@ -26,7 +26,7 @@ def read_nfc_tag():
         else:
             print(f"Failed to read NFC tag. SW1: {sw1}, SW2: {sw2}")
             return None
-        
+
     except NoCardException:
         print("WAITING")
         return None

@@ -97,21 +97,21 @@ def update_quantity(nfc_tag : str, quantity_picked : int) -> bool:
     False otherwise.'''
 
     product = get_product(nfc_tag)
-    
+
     if product is None : 
         print("Product not found\n")
         return False
-    
+
     if product.is_out == 1:
         print(f"Product {product.name} is OUT OF STOCK.\n")
         return False
-    
+
     print(f"Product {'found' if product is not None else 'not found'} : ")
     new_quantity = product.quantity - quantity_picked
     if new_quantity < 0:
         print(f"Not enough stock. Avilable : {product.quantity}\n")
         return False
-    
+
     is_out = 1 if new_quantity == 0 else 0
     now = datetime.now().isoformat()
     print(f"Picking {quantity_picked} from {product.name}...\n")
@@ -128,7 +128,7 @@ def update_quantity(nfc_tag : str, quantity_picked : int) -> bool:
         print("Stock is now empty, Product marked OUT OF STOCK\n")
     else : 
         print(f"Stock updated. Remaining : {new_quantity}")
-    
+
     return True
 
 def restock_product(nfc_tag : str, qunatity_added: int) -> bool:
@@ -137,11 +137,11 @@ def restock_product(nfc_tag : str, qunatity_added: int) -> bool:
     Returns True if the update was successful, False otherwise.'''
 
     product = get_product(nfc_tag)
-    
+
     if product is None : 
         print("Product not found\n")
         return False
-    
+
     print(f"Product {'found' if product is not None else 'not found'} : ")
     new_quantity = product.quantity + qunatity_added
     now = datetime.now().isoformat()
@@ -166,7 +166,7 @@ def print_product(product: Product):
     if product is None:
         print("No product to display\n")
         return
-    
+
     stock_status = "OUT OF STOCK" if product.is_out == 1 else "IN STOCK"
     print("\n" + "="*45)
     print(f"NFC Tag : {product.nfc_tag}")
