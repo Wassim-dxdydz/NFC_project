@@ -1,4 +1,4 @@
-from database import Product, init_db, add_product, get_product, update_quantity, restock_product
+from database import Product, init_db, add_product, get_product, update_quantity, restock_product, print_product
 
 def test():
     init_db()
@@ -14,14 +14,15 @@ def test():
     )
 
     add_product(p)
+    print_product(p)
 
-    update_quantity("TEST001",5)
-    print(get_product("TEST001"))
+    update_quantity("TEST001",10)
+    print_product(get_product("TEST001"))
 
     restock_product("TEST001", 15)
-    print(get_product("TEST001"))
+    print_product(get_product("TEST001"))    
 
-    print(get_product("GTEST001"))
+    print_product(get_product("GTEST001"))
 
 if __name__ == "__main__":
     test()

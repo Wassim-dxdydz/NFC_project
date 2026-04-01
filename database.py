@@ -69,7 +69,6 @@ def get_product(nfc_tag: str) -> Optional[Product]:
     row = cursor.fetchone()
     connection.close()
     if row is None:
-        print("No product with this NFC tag, Would you like to add it  ?\nResult :")
         return None
     return Product(
         id=row[0],
@@ -97,6 +96,7 @@ def update_quantity(nfc_tag : str, quantity_picked : int) -> bool:
         print(f"Product {product.name} is OUT OF STOCK.\n")
         return False
     
+    print(f"Product {'found' if product is not None else 'not found'} : ")
     new_quantity = product.quantity - quantity_picked
     if new_quantity < 0:
         print(f"Not enough stock. Avilable : {product.quantity}\n")
@@ -104,6 +104,7 @@ def update_quantity(nfc_tag : str, quantity_picked : int) -> bool:
     
     is_out = 1 if new_quantity == 0 else 0
     now = datetime.now().isoformat()
+    print(f"Picking {quantity_picked} from {product.name}...\n")
 
     connection = sqlite3.connect(DB_NAME)
     cursor = connection.cursor()
@@ -127,8 +128,10 @@ def restock_product(nfc_tag : str, qunatity_added: int) -> bool:
         print("Product not found\n")
         return False
     
+    print(f"Product {'found' if product is not None else 'not found'} : ")
     new_quantity = product.quantity + qunatity_added
     now = datetime.now().isoformat()
+    print(f"Restocking {qunatity_added} to {product.name}...\n")
 
     connection = sqlite3.connect(DB_NAME)
     cursor = connection.cursor()
@@ -141,3 +144,22 @@ def restock_product(nfc_tag : str, qunatity_added: int) -> bool:
 
     print(f"Product restocked. New quantity : {new_quantity}\n")
     return True
+
+def print_product(product: Product):
+    if product is None:
+        print("No product to display\n")
+        return
+    
+    stock_status = "OUT OF STOCK" if product.is_out == 1 else "IN STOCK"
+    print("\n" + "="*45)
+    print(f"NFC Tag : {product.nfc_tag}")
+    print(f"Name : {product.name}")
+    print(f"Description : {product.description}")
+    print(f"Production Date : {product.production_date}")
+    print(f"Expiration Date : {product.expiration_date}")
+    print(f"Other Infos : {product.other_infos}")
+    print(f"Quantity : {product.quantity}")
+    print(f"Is Out of Stock : {stock_status}")
+    print(f"Created At : {product.created_at}")
+    print(f"Modified At : {product.modified_at}")
+    print("="*45 + "\n")
