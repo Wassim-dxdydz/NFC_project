@@ -116,7 +116,7 @@ def update_quantity(nfc_tag : str, quantity_picked : int) -> bool:
     if is_out == 1 :
         print("Stock is now empty, Product marked OUT OF STOCK\n")
     else : 
-        print(f"Stock updated. Remaining : {product.quantity}")
+        print(f"Stock updated. Remaining : {new_quantity}")
     
     return True
 
@@ -139,5 +139,5 @@ def restock_product(nfc_tag : str, qunatity_added: int) -> bool:
     connection.commit()
     connection.close()
 
-    print(f"Product restocked. New quantity : {product.quantity}")
+    print(f"Product restocked. New quantity : {new_quantity}\n")
     return True
