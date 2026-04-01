@@ -1,4 +1,4 @@
-from database import Product, init_db, add_product, get_product
+from database import Product, init_db, add_product, get_product, update_quantity
 
 def test():
     init_db()
@@ -14,8 +14,11 @@ def test():
     )
 
     add_product(p)
+
+    update_quantity("TEST001",5)
     print(get_product("TEST001"))
 
+    update_quantity("TEST001",5)
     print(get_product("TEST001"))
 
     print(get_product("GTEST001"))
