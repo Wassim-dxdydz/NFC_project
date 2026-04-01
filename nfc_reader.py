@@ -5,6 +5,9 @@ from smartcard.Exceptions import NoCardException, CardConnectionException
 GET_UID = [0xFF, 0xCA, 0x00, 0x00, 0x00]
 
 def read_nfc_tag():
+    '''
+    Scans for an NFC tag and returns its UID as a string. If no tag is present, it returns "WAITING".
+    '''
     try:
         available_readers = readers()
         if not available_readers:

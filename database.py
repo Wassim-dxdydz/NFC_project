@@ -20,7 +20,9 @@ class Product:
     id: Optional[int] = None
 
 def init_db():
-    '''Initializes the database and creates the products table if it doesn't exist.'''
+    '''
+    Initializes the database and creates the products table if it doesn't exist.
+    '''
 
     connection = sqlite3.connect(DB_NAME)
     cursor = connection.cursor()
@@ -45,7 +47,9 @@ def init_db():
 
 
 def add_product(product : Product):
-    '''Adds a new product to the database. If a product with the same NFC tag already exists, it will not be added.'''
+    '''
+    Adds a new product to the database. If a product with the same NFC tag already exists, it will not be added.
+    '''
 
     connection = sqlite3.connect(DB_NAME)
     cursor = connection.cursor()
@@ -67,7 +71,9 @@ def add_product(product : Product):
 
 
 def get_product(nfc_tag: str) -> Optional[Product]:
-    '''Retrieves a product from the database by its NFC tag. Returns None if the product is not found.'''
+    '''
+    Retrieves a product from the database by its NFC tag. Returns None if the product is not found.
+    '''
 
     connection = sqlite3.connect(DB_NAME)
     cursor = connection.cursor()
@@ -92,9 +98,11 @@ def get_product(nfc_tag: str) -> Optional[Product]:
 
 
 def update_quantity(nfc_tag : str, quantity_picked : int) -> bool:
-    '''Updates the quantity of a product when it is picked. If the product is out of stock after picking,
+    '''
+    Updates the quantity of a product when it is picked. If the product is out of stock after picking,
     it will be marked as such. Returns True if the update was successful, 
-    False otherwise.'''
+    False otherwise.
+    '''
 
     product = get_product(nfc_tag)
 
@@ -132,9 +140,11 @@ def update_quantity(nfc_tag : str, quantity_picked : int) -> bool:
     return True
 
 def restock_product(nfc_tag : str, qunatity_added: int) -> bool:
-    '''Restocks a product by adding the specified quantity to the existing stock.
+    '''
+    Restocks a product by adding the specified quantity to the existing stock.
     If the product was previously marked as out of stock, it will be marked as in stock after restocking.
-    Returns True if the update was successful, False otherwise.'''
+    Returns True if the update was successful, False otherwise.
+    '''
 
     product = get_product(nfc_tag)
 
@@ -160,8 +170,10 @@ def restock_product(nfc_tag : str, qunatity_added: int) -> bool:
     return True
 
 def print_product(product: Product):
-    '''Prints the details of a product in a readable format. If the product is None,
-    it will print a message indicating that there is no product to display.'''
+    '''
+    Prints the details of a product in a readable format. If the product is None,
+    it will print a message indicating that there is no product to display.
+    '''
 
     if product is None:
         print("No product to display\n")
