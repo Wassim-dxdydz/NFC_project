@@ -1,4 +1,6 @@
 from database import Product, init_db, add_product, get_product, update_quantity, restock_product, print_product
+from nfc_reader import read_nfc_tag
+import time
 
 def test():
     init_db()
@@ -25,4 +27,14 @@ def test():
     print_product(get_product("GTEST001"))
 
 if __name__ == "__main__":
-    test()
+    last_uid = None
+
+    while True:
+        result = read_nfc_tag()
+        if result and result != "WAITING":
+            if result != last_uid:
+                print(f"New NFC tag detected: {result}\n")
+                last_uid = result
+        elif result is None:
+            time.sleep(2)
+        time.sleep(1)
