@@ -3,7 +3,6 @@ from contextlib import contextmanager
 import datetime
 from logging import log
 import sqlite3
-
 from database import Product
 
 DB_NAME = "nfc_products.db"
@@ -46,7 +45,7 @@ def init_db():
                 modified_at TEXT NOT NULL
             )'''
         )
-    
+
     log.info("Database initialized.\n")
 
 def add_product(product : Product):
