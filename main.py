@@ -1,5 +1,5 @@
 from database import Product, init_db, add_product, get_product, update_quantity, restock_product, print_product
-from nfc_reader import read_nfc_tag
+from nfc_reader import handle_nfc_interaction, read_nfc_tag
 import time
 
 def test():
@@ -26,7 +26,8 @@ def test():
 
     print_product(get_product("GTEST001"))
 
-if __name__ == "__main__":
+
+"""if __name__ == "__main__":
     last_uid = None
 
     while True:
@@ -37,4 +38,4 @@ if __name__ == "__main__":
                 last_uid = result
         elif result is None:
             time.sleep(2) # C'est pour éviter '''UN PEU''' de spammer la console avec Waiting, on peut ajuster ce délai selon les besoins
-        time.sleep(1) # Ceci est pour minimiser l'utilisation du CPU, on peut aussi ajuster ce délai selon les besoins
+        time.sleep(1) # Ceci est pour minimiser l'utilisation du CPU, on peut aussi ajuster ce délai selon les besoins"""
