@@ -53,6 +53,7 @@ def add_product(product : Product):
     Adds a new product to the database.
     If a product with the same NFC tag already exists, it will not be added.
     '''
+
     now = datetime.now().isoformat()
     try:
         with _get_connection() as connection:
