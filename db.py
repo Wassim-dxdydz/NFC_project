@@ -90,3 +90,45 @@ def get_product(nfc_tag: str) -> Product:
         quantity=row['quantity'],
         is_out=row['is_out']
     )
+
+def update_quantity(nfc_tag: str, quantity: int):
+    '''
+    UPdates the quantity of a product when it is picked.
+    If the product reaches 0 stock, it is marked as out of stock.
+    Returns True if the update was successful, False otherwise.
+    '''
+
+    Product = get_product(nfc_tag)
+
+    if Product is None:
+        log.warning("Product not found.\n")
+        return False
+
+    if Product.is_out == 1:
+        log.warning(f"Product '{Product.name}' is out of stock.\n")
+        return False
+
+    log.info(f"Product found : {Product.name}")
+    new_quantity = Product.quantity - quantity
+
+    if new_quantity < 0:
+        log.warning(f"Not enough stock. Available : {Product.quantity}\n")
+        return False
+
+    is_out = 1 if new_quantity == 0 else 0
+    now = datetime.now().isoformat()
+    log.info(f"Picking {quantity} from '{Product.name}'...\n")
+
+    with _get_connection() as connection:
+        connection.execute('''
+            UPDATE products
+            SET quantity = ?, is_out = ?, modified_at = ?
+            WHERE nfc_tag = ?''',
+            (new_quantity, is_out, now, nfc_tag)
+        )
+
+    if is_out == 1:
+        log.info(f"Stock is now empty. Product '{Product.name}' is marked as out of stock.\n")
+    else :
+        log.info(f"Stock updated. Remaining : {new_quantity}.\n")
+    return True
