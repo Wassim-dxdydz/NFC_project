@@ -27,6 +27,29 @@ def test():
     print_product(get_product("GTEST001"))
 
 
+if __name__ == "__main__":
+    init_db()
+    last_uid = None
+
+    try:
+        while True:
+            result = read_nfc_tag()
+            if result and result != "WAITING":
+                if result != last_uid:
+                    print(f"New NFC tag detected: {result}\n")
+                    last_uid = result
+                    handle_nfc_interaction(result)
+                    print("\nWaiting for next NFC tag...\n")
+            elif result is None:
+                time.sleep(2) # C'est pour éviter '''UN PEU''' de spammer la console avec Waiting, on peut ajuster ce délai selon les besoins
+            
+            if result == "WAITING":
+                last_uid = None # Réinitialiser last_uid quand la carte est retirée, cela permet de retapper la même carte.
+            time.sleep(1) # Minimiser l'utilisation du CPU
+    except KeyboardInterrupt:
+        print("\nExiting program.")
+
+
 """if __name__ == "__main__":
     last_uid = None
 
