@@ -132,3 +132,32 @@ def update_quantity(nfc_tag: str, quantity: int):
     else :
         log.info(f"Stock updated. Remaining : {new_quantity}.\n")
     return True
+
+def restock_product(nfc_tag: str, quantity: int) -> bool:
+    '''
+    Restocks a product by adding the specified quantity to the existing stock.
+    If the product was previously marked as out of stock, it will be marked as in stock after restocking.
+    Returns True if the update was successful, False otherwise.
+    '''
+
+    product = get_product(nfc_tag)
+
+    if product is None:
+        log.warning("Product not found.\n")
+        return False
+    
+    log.info(f"Product found : {product.name}")
+    new_quantity = product.quantity + quantity
+    now = datetime.now().isoformat()
+    log.info(f"Restocking {quantity} units to '{product.name}'...\n")
+
+    with _get_connection() as connection:
+        connection.execute('''
+            UPDATE products
+            SET quantity = ?, is_out = 0, modified_at = ?
+            WHERE nfc_tag = ?''',
+            (new_quantity, now, nfc_tag)
+        )
+    
+    log.info(f"Product restocked. New quantity : {new_quantity}.\n")
+    return True
