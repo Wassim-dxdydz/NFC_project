@@ -3,9 +3,24 @@ from contextlib import contextmanager
 import datetime
 from logging import log
 import sqlite3
-from database import Product
+from typing import Optional
+from attr import dataclass
 
 DB_NAME = "nfc_products.db"
+
+@dataclass
+class Product:
+    nfc_tag : str
+    name : str
+    description : str
+    production_date : str
+    expiration_date : str
+    other_infos : str
+    quantity : int = 0
+    is_out : int = 0
+    created_at: Optional[str] = None
+    modified_at: Optional[str] = None
+    id: Optional[int] = None
 
 @contextmanager
 def _get_connection():
@@ -161,3 +176,27 @@ def restock_product(nfc_tag: str, quantity: int) -> bool:
     
     log.info(f"Product restocked. New quantity : {new_quantity}.\n")
     return True
+
+def print_product(product: Product):
+    '''
+    Prints the details of a product in a readable format.
+    If the product is None, prints a message indicating no product to display.
+    '''
+
+    if product is None:
+        log.info("No product to display.\n")
+        return
+
+    stock_status = "OUT OF STOCK" if product.is_out == 1 else "IN STOCK"
+    print("\n" + "="*45)
+    print(f"NFC Tag         : {product.nfc_tag}")
+    print(f"Name            : {product.name}")
+    print(f"Description     : {product.description}")
+    print(f"Production Date : {product.production_date}")
+    print(f"Expiration Date : {product.expiration_date}")
+    print(f"Other Infos     : {product.other_infos}")
+    print(f"Quantity        : {product.quantity}")
+    print(f"Stock Status    : {stock_status}")
+    print(f"Created At      : {product.created_at}")
+    print(f"Modified At     : {product.modified_at}")
+    print("="*45 + "\n")
