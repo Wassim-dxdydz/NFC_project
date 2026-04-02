@@ -67,3 +67,26 @@ def add_product(product : Product):
         log.info("Product added.\n")
     except sqlite3.IntegrityError:
         log.warning("A product with this NFC tag already exists.\n")
+
+def get_product(nfc_tag: str) -> Product:
+    '''
+    Retrieves a product from the database by its NFC tag.
+    Returns a Product object if found, otherwise returns None.
+    '''
+
+    with _get_connection() as connection:
+        row =  connection.execute('SELECT * FROM products WHERE nfc_tag = ?', (nfc_tag,)).fetchone()
+
+    if row is None:
+        return None
+
+    return Product(
+        nfc_tag=row['nfc_tag'],
+        name=row['name'],
+        description=row['description'],
+        production_date=row['production_date'],
+        expiration_date=row['expiration_date'],
+        other_infos=row['other_infos'],
+        quantity=row['quantity'],
+        is_out=row['is_out']
+    )
