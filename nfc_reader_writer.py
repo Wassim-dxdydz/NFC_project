@@ -94,3 +94,14 @@ def parse_data(prompt: str) -> str:
         except ValueError:
             print("Invalid date format. Please enter a date in YYYY-MM-DD format.\n")
 
+def parse_int(prompt: str) -> int:
+    '''
+    Prompts the user for an integer, retrying until valid.
+    '''
+
+    while True:
+        val = input(prompt).strip()
+        try:
+            return int(val)
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.\n")
