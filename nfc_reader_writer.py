@@ -7,6 +7,7 @@ from smartcard.System import readers
 from smartcard.util import toHexString
 from smartcard.Exceptions import NoCardException, CardConnectionException
 from logging import log
+from db import Product, add_product, get_product, print_product, restock_product, update_quantity
 
 GET_UID = [0xFF, 0xCA, 0x00, 0x00, 0x00]
 _MISSING_READER_WARN_INTERVAL = 10
@@ -81,7 +82,7 @@ def input_with_timeout(prompt: str, timeout: int = 30) -> str:
         print("\nInput timed out.")
         return ""
 
-def parse_data(prompt: str) -> str:
+def parse_date(prompt: str) -> str:
     '''
     Prompts the user for a date in YYYY-MM-DD format, retrying untill valid.
     '''
@@ -105,3 +106,59 @@ def parse_int(prompt: str) -> int:
             return int(val)
         except ValueError:
             print("Invalid input. Please enter a valid integer.\n")
+
+def handle_nf_interaction(nfc_tag: str):
+    '''
+    Business logic: check if tax exists in the database , otherwise offer registration.
+    '''
+
+    print(f"\nChecking Tag : {nfc_tag} ...\n")
+    product = get_product(nfc_tag)
+
+    if product:
+        print("This NFC tag already exists in the database\n")
+        print_product(product)
+
+        choice = input_with_timeout(
+            "Do you want to Update quantity (Press u) or Restock quantity (Press r) ? (Press Enter to skip):\n", timeout=30
+        )
+
+        if choice == "u":
+            qty = parse_int("How many to remove ? :\n")
+            update_quantity(nfc_tag, qty)
+            print_product(get_product(nfc_tag))
+        elif choice == "r":
+            qty = parse_int("How many to add ? :\n")
+            restock_product(nfc_tag, qty)
+            print_product(get_product(nfc_tag))
+
+    else:
+        print("This NFC is unknown")
+        choice = input_with_timeout(
+            "Do you want to add this product to the database ? (y/n)\n", timeout=30
+        )
+
+        if choice == "y":
+            print("Please enter product details : ")
+            name = input("Enter product name : ")
+            description = input("Enter product description : ")
+            production_date = parse_date("Enter production date (YYYY-MM-DD) : ")
+            expiration_date = parse_date("Enter expiration date (YYYY-MM-DD) : ")
+            other_infos = input("Enter other infos (optional) : ")
+            qty = parse_int("Enter quantity : ")
+
+            new_product = Product(
+                nfc_tag=nfc_tag,
+                name=name,
+                description=description,
+                production_date=production_date,
+                expiration_date=expiration_date,
+                other_infos=other_infos,
+                quantity=qty
+            )
+
+            add_product(new_product)
+            print_product(nfc_tag)
+
+        else:
+            print("Registration cancelled.\n")
