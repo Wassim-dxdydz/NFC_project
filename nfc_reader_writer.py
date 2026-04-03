@@ -1,4 +1,5 @@
 
+from datetime import datetime
 from select import select
 import sys
 
@@ -79,3 +80,17 @@ def input_with_timeout(prompt: str, timeout: int = 30) -> str:
     else:
         print("\nInput timed out.")
         return ""
+
+def parse_data(prompt: str) -> str:
+    '''
+    Prompts the user for a date in YYYY-MM-DD format, retrying untill valid.
+    '''
+
+    while True:
+        val = input(prompt).strip()
+        try:
+            datetime.strptime(val, "%Y-%m-%d")
+            return val
+        except ValueError:
+            print("Invalid date format. Please enter a date in YYYY-MM-DD format.\n")
+
