@@ -1,4 +1,7 @@
 
+from select import select
+import sys
+
 from smartcard.System import readers
 from smartcard.util import toHexString
 from smartcard.Exceptions import NoCardException, CardConnectionException
@@ -59,3 +62,20 @@ def read_nfc_tag():
     except Exception as e:
         log.error(f"An unexpected error occurred: {e}")
         return None
+
+def input_with_timeout(prompt: str, timeout: int = 30) -> str:
+    '''
+    Prompts the user for input with a timeout (Linux/MacOs only).
+    Returns empty string if the user doesn't respond in time.
+    FAils back to regular imput() on Windows.
+    '''
+
+    print(prompt, end='', flush=True)
+    if sys.platform.startswith('win'):
+        return input().strip().lower()
+    ready, _, _ = select.select([sys.stdin], [], [], timeout)
+    if ready:
+        return sys.stdin.readline().strip().lower()
+    else:
+        print("\nInput timed out.")
+        return ""
