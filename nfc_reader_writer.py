@@ -42,11 +42,11 @@ def read_nfc_tag():
         log.debug(f"Data received: {toHexString(data)}, SW1: {sw1}, SW2: {sw2}")
         # Check the status words to determine if the UID was read successfully
         if sw1 == 0x90 and sw2 == 0x00:
-            uid = toHexString(data)
+            uid = toHexString(data).replace(" ", "").upper()  # Format the UID as a continuous uppercase string
             log.info(f"NFC tag UID read: {uid}")
             return uid
         else:
-            log.warning(f"Failed to read NFC tag. SW1: {sw1}, SW2: {sw2}")
+            log.warning(f"Failed to read NFC tag. SW1: {hex(sw1)}, SW2: {hex(sw2)}")
             return None
 
     # Handle specific exceptions for better logging and control flow
