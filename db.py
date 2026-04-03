@@ -1,12 +1,13 @@
 
 from contextlib import contextmanager
 import datetime
-from logging import log
+import logging
 import sqlite3
 from typing import Optional
 from attr import dataclass
 
 DB_NAME = "nfc_products.db"
+log = logging.getLogger(__name__)
 
 @dataclass
 class Product:

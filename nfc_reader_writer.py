@@ -2,16 +2,16 @@
 from datetime import datetime
 from select import select
 import sys
-
 from smartcard.System import readers
 from smartcard.util import toHexString
 from smartcard.Exceptions import NoCardException, CardConnectionException
-from logging import log
+import logging
 from db import Product, add_product, get_product, print_product, restock_product, update_quantity
 
 GET_UID = [0xFF, 0xCA, 0x00, 0x00, 0x00]
 _MISSING_READER_WARN_INTERVAL = 10
 _missing_reader_count = 0
+log = logging.getLogger(__name__)
 
 def read_nfc_tag():
     '''

@@ -1,6 +1,10 @@
+import logging
 from database import Product, init_db, add_product, get_product, update_quantity, restock_product, print_product
 from nfc_reader import handle_nfc_interaction, read_nfc_tag
 import time
+
+
+log = logging.getLogger(__name__)
 
 def test():
     init_db()
@@ -28,7 +32,38 @@ def test():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
+
     init_db()
+    log.info("Starting NFC reader : Please place a tag on the reader ...\n")
+
+    last_uid = None
+
+    try:
+        while True:
+            result = read_nfc_tag()
+
+            if result and result != "WAITING":
+                if result != last_uid:
+                    logging.info(f"New NFC tag detected: {result}\n")
+                    last_uid = result
+                    handle_nfc_interaction(result)
+                    logging.info("\nWaiting for next NFC tag...\n")
+            elif result is None:
+                time.sleep(2) # C'est pour éviter '''UN PEU''' de spammer la console avec Waiting, on peut ajuster ce délai selon les besoins
+
+            if result == "WAITING":
+                last_uid = None # Réinitialiser last_uid quand la carte est retirée, cela permet de retapper la même carte.
+
+            time.sleep(1) # Minimiser l'utilisation du CPU
+
+    except KeyboardInterrupt:
+        logging.info("\nNFC reader stopped.")
+
+
+"""    init_db()
     last_uid = None
 
     try:
@@ -47,7 +82,7 @@ if __name__ == "__main__":
                 last_uid = None # Réinitialiser last_uid quand la carte est retirée, cela permet de retapper la même carte.
             time.sleep(1) # Minimiser l'utilisation du CPU
     except KeyboardInterrupt:
-        print("\nExiting program.")
+        print("\nExiting program.")"""
 
 
 """if __name__ == "__main__":
