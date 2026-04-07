@@ -61,23 +61,47 @@ if __name__ == "__main__":
         log.info("\nNFC reader stopped.")
 
 """
-wassim@debian:~/inventree$ docker compose exec inventree-server bash
-root@117c105f9e44:/home/inventree# cd /home/inventree/src/backend/InvenTree
-root@117c105f9e44:/home/inventree/src/backend/InvenTree# python manage.py makemigrations nfc_plugin
-INVE-W3: Could not detect git information.
-2026-04-07T14:55:38.813605Z [warning  ] Cannot set global setting "_MAINTENANCE_MODE" - database is not accessible [inventree]
-2026-04-07 14:55:38,813 WARNING {'event': 'Cannot set global setting "_MAINTENANCE_MODE" - database is not accessible', 'timestamp': '2026-04-07T14:55:38.813605Z', 'logger': 'inventree', 'level': 'warning'}
-No installed app with label 'nfc_plugin'.
-""" 
+from plugin import InvenTreePlugin
+from plugin.mixins import BarcodeMixin, SettingsMixin, AppMixin
 
-"""
-[metadata]
-name = nfc-plugin
-version = 0.1.0
-description = NFC Drug Plugin for InvenTree
-author = ABAHRI Wassim
+class NFCDrugPlugin(AppMixin, BarcodeMixin, SettingsMixin, InvenTreePlugin):
+    NAME = "NFCDrugPlugin"
+    SLUG = "nfc-drug"
+    TITLE = "NFC Drug Plugin"
+    VERSION = "0.1.0"
+    AUTHOR = "ABAHRI Wassim"
+    DESCRIPTION = "Plugin for NFC Drug management"
+    SETTINGS = {
+        "READER_TIMEOUT": {
+            "name": "Reader Timeout",
+            "description": "Seconds to wait for a tag before giving up",
+            "default": 30,
+            "validator": int,
+        }
+    }
 
-[options]
-py_modules = nfc_plugin
-install_requires = InvenTree
+    def scan(self, barcode_data):
+        """
+        Called when POST /api/barcode/ receives data.
+        Looks up StockItem via the dedicated nfc_tag.uid column.
+        Returns match dict if found, None if not. 
+        """
+
+        from nfc_plugin.models import StockItemNFCTag
+        from stock.models import StockItem
+
+        uid = str(barcode_data).strip().upper()
+
+        try:
+            nfc = StockItemNFCTag.objects.get(uid=uid)
+            item =  nfc.stock_item
+            return {
+                StockItem.barcode_model_type():{
+                    "pk": item.pk,
+                    "api_url": f"/api/stock/{item.pk}/",
+                    "web_url": f"/stock/item/{item.pk}/",
+                }
+            }
+        except StockItemNFCTag.DoesNotExist:
+            return None
 """
