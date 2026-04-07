@@ -59,3 +59,13 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         log.info("\nNFC reader stopped.")
+
+"""
+wassim@debian:~/inventree$ docker compose exec inventree-server bash
+root@117c105f9e44:/home/inventree# cd /home/inventree/src/backend/InvenTree
+root@117c105f9e44:/home/inventree/src/backend/InvenTree# python manage.py makemigrations nfc_plugin
+INVE-W3: Could not detect git information.
+2026-04-07T14:55:38.813605Z [warning  ] Cannot set global setting "_MAINTENANCE_MODE" - database is not accessible [inventree]
+2026-04-07 14:55:38,813 WARNING {'event': 'Cannot set global setting "_MAINTENANCE_MODE" - database is not accessible', 'timestamp': '2026-04-07T14:55:38.813605Z', 'logger': 'inventree', 'level': 'warning'}
+No installed app with label 'nfc_plugin'.
+"""
