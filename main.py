@@ -68,4 +68,16 @@ INVE-W3: Could not detect git information.
 2026-04-07T14:55:38.813605Z [warning  ] Cannot set global setting "_MAINTENANCE_MODE" - database is not accessible [inventree]
 2026-04-07 14:55:38,813 WARNING {'event': 'Cannot set global setting "_MAINTENANCE_MODE" - database is not accessible', 'timestamp': '2026-04-07T14:55:38.813605Z', 'logger': 'inventree', 'level': 'warning'}
 No installed app with label 'nfc_plugin'.
+""" 
+
+"""
+[metadata]
+name = nfc-plugin
+version = 0.1.0
+description = NFC Drug Plugin for InvenTree
+author = ABAHRI Wassim
+
+[options]
+py_modules = nfc_plugin
+install_requires = InvenTree
 """
