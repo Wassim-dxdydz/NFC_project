@@ -2,6 +2,7 @@
 from datetime import datetime
 from select import select
 import sys
+import threading
 from smartcard.System import readers
 from smartcard.util import toHexString
 from smartcard.Exceptions import NoCardException, CardConnectionException
@@ -67,20 +68,28 @@ def read_nfc_tag():
 
 def input_with_timeout(prompt: str, timeout: int = 30) -> str:
     '''
-    Prompts the user for input with a timeout (Linux/MacOs only).
-    Returns empty string if the user doesn't respond in time.
-    FAils back to regular imput() on Windows.
+    Prompts the user for input with a timeout.
+    Cross-platform: works on Windows, Linux, and macOS.
+    Returns the user input, or empty string if the timeout is reached.
     '''
 
-    print(prompt, end='', flush=True)
-    if sys.platform.startswith('win'):
-        return input().strip().lower()
-    ready, _, _ = select.select([sys.stdin], [], [], timeout)
-    if ready:
-        return sys.stdin.readline().strip().lower()
-    else:
-        print("\nInput timed out.")
+    result = []
+
+    def read_input():
+        try:
+            result.append(input(prompt).strip().lower())
+        except Exception:
+            result.append("")
+
+    thread = threading.Thread(target=read_input, daemon=True)
+    thread.start()
+    thread.join(timeout=timeout)
+
+    if thread.is_alive():
+        log.info("Input timeout reached.")
         return ""
+    return result[0] if result else ""
+
 
 def parse_date(prompt: str) -> str:
     '''
