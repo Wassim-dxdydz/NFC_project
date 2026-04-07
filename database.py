@@ -69,7 +69,6 @@ def add_product(product : Product):
     finally:
         connection.close()
 
-
 def get_product(nfc_tag: str) -> Optional[Product]:
     '''
     Retrieves a product from the database by its NFC tag. Returns None if the product is not found.
@@ -77,7 +76,7 @@ def get_product(nfc_tag: str) -> Optional[Product]:
 
     connection = sqlite3.connect(DB_NAME)
     cursor = connection.cursor()
-    cursor.execute('SELECT * FROM products WHERE nfc_tag = ?', (nfc_tag,))
+    cursor.execute('SELECT * FROM products WHERE UPPER(nfc_tag) = UPPER(?)', (nfc_tag,))
     row = cursor.fetchone()
     connection.close()
     if row is None:
@@ -95,7 +94,6 @@ def get_product(nfc_tag: str) -> Optional[Product]:
         created_at=row[9],
         modified_at=row[10]
     )
-
 
 def update_quantity(nfc_tag : str, quantity_picked : int) -> bool:
     '''

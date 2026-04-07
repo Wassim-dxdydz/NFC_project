@@ -7,7 +7,7 @@ from smartcard.System import readers
 from smartcard.util import toHexString
 from smartcard.Exceptions import NoCardException, CardConnectionException
 import logging
-from db import Product, add_product, get_product, print_product, restock_product, update_quantity
+from database import Product, add_product, get_product, print_product, restock_product, update_quantity
 
 GET_UID = [0xFF, 0xCA, 0x00, 0x00, 0x00]
 _MISSING_READER_WARN_INTERVAL = 10
@@ -87,7 +87,7 @@ def input_with_timeout(prompt: str, timeout: int = 30) -> str:
     try:
         result = q.get(timeout=timeout)
         return result.strip().lower()
-    except queue.Empty():
+    except queue.Empty:
         print(f"No response after {timeout}s. Sleeping...")
         thread.join(0)
         return 
@@ -168,7 +168,7 @@ def handle_nfc_interaction(nfc_tag: str):
             )
 
             add_product(new_product)
-            print_product(nfc_tag)
+            print_product(new_product)
 
         else:
             print("Registration cancelled.\n")
