@@ -1,7 +1,7 @@
 
 from datetime import datetime
 from select import select
-import sys
+import queue
 import threading
 from smartcard.System import readers
 from smartcard.util import toHexString
@@ -73,23 +73,24 @@ def input_with_timeout(prompt: str, timeout: int = 30) -> str:
     Returns the user input, or empty string if the timeout is reached.
     '''
 
-    result = []
+    q = queue.Queue()
 
     def read_input():
         try:
-            result.append(input(prompt).strip().lower())
-        except Exception:
-            result.append("")
+            q.put(input(prompt))
+        except EOFError:
+            q.put("")
 
     thread = threading.Thread(target=read_input, daemon=True)
     thread.start()
-    thread.join(timeout=timeout)
 
-    if thread.is_alive():
-        log.info("Input timeout reached.")
+    try:
+        result = q.get(timeout=timeout)
+        return result.strip().lower()
+    except queue.Empty():
+        print(f"No response after {timeout}s. Sleeping...")
+        thread.join(0)
         return ""
-    return result[0] if result else ""
-
 
 def parse_date(prompt: str) -> str:
     '''
