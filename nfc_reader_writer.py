@@ -90,7 +90,7 @@ def input_with_timeout(prompt: str, timeout: int = 30) -> str:
     except queue.Empty():
         print(f"No response after {timeout}s. Sleeping...")
         thread.join(0)
-        return ""
+        return 
 
 def parse_date(prompt: str) -> str:
     '''
@@ -117,7 +117,7 @@ def parse_int(prompt: str) -> int:
         except ValueError:
             print("Invalid input. Please enter a valid integer.\n")
 
-def handle_nf_interaction(nfc_tag: str):
+def handle_nfc_interaction(nfc_tag: str):
     '''
     Business logic: check if tax exists in the database , otherwise offer registration.
     '''
