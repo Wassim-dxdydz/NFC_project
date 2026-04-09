@@ -40,8 +40,8 @@ sudo systemctl enable --now pcscd
 ### 1. Clone the Project
 
 ```bash
-git clone <your-repository-url>
-cd nfc_project
+git clone https://github.com/Wassim-dxdydz/NFC_project.git
+cd NFC_project
 ```
 
 ---
