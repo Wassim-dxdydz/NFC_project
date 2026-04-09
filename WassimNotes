@@ -1,0 +1,198 @@
+# First of all I needed to install docker and docker compose 
+
+# Add Docker's official GPG key
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+# Add Docker repo
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
+  https://download.docker.com/linux/debian $(lsb_release -cs) stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Install Docker Engine + Compose plugin
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Allow running Docker without sudo
+sudo usermod -aG docker $USER
+newgrp docker
+
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+nvm install --lts
+node --version && npm --version
+
+# I had a lot of headache trying to install inventree and running the docker images without error !!! (RIP the outdated documentation of inventree)
+
+mkdir inventree && cd inventree
+
+# Download official docker-compose config
+wget -q https://raw.githubusercontent.com/inventree/InvenTree/master/contrib/container/docker-compose.yml
+wget -q https://raw.githubusercontent.com/inventree/InvenTree/master/contrib/container/.env
+wget https://raw.githubusercontent.com/inventree/InvenTree/stable/contrib/container/Caddyfile
+
+# Changed .env credentials
+
+# Initialize the database and admin user :
+docker compose run --rm inventree-server invoke update
+
+# Start InvenTree :
+docker compose up -d
+
+echo "127.0.0.1 inventree.localhost" | sudo tee -a /etc/hosts
+cd inventree-data/plugins
+
+# Added rights to my self to create folders inside
+sudo chown -R wassim:wassim ~/inventree/inventree-data/plugins
+mkdir nfc_plugin && cd nfc_plugin
+touch __init__.py
+touch nfc_plugin.py
+touch setup.cfg
+
+# Updated nfc_plugin.py and setup.cfg
+from plugin import InvenTreePlugin
+
+class NFSProductPlugin(InvenTreePlugin):
+    NAME = "NFCDrugPlugin"
+    SLUG = "nfc-drug"
+    TITLE = "NFS Drug Plugin"
+    VERSION = "0.1.0"
+    AUTHOR = "ABAHRI Wassim"
+    DESCRIPTION = "Plugin for NFC Drug management"
+    
+[metadata]
+name = nfc-plugin
+version = 0.1.0
+description = NFC Drug Plugin for InvenTree
+author = ABAHRI Wassim
+
+[options]
+py_modules = nfc_plugin
+install_requires = InvenTree
+
+# Well it would've been great I coded directly to the InvenTree plugin but i prefer doing things slow and steady and so I'm just going elsewhere to code my functions using full python code untill I can assure with the Tests and all that everything is working nice with no problem
+
+# for this and since we are using a cryptnox USB NFC reader for now I'm just going to read the documentation and test some function for this day :
+https://frankmorgner.github.io/vsmartcard/remote-reader/README.html
+
+mkdir nfc_project && cd nfc_project
+sudo apt-get install -y python3.13-venv
+
+python3 -m venv venv
+source venv/bin/activate
+
+pip install nfcpy
+sudo apt-get install -y pcscd libpcsclite-dev swig python3-dev
+sudo systemctl start pcscd
+sudo systemctl enable pcscd
+pip install cryptnoxpy
+
+code .
+
+# Here and finally before starting to code or anything serious to do I'm just gonna add some things to simplify reading the NFC tag from the USB reader of cryptnox and so first I verified all the USB ports and if the NFC reader is really plugged in :
+lsusb
+
+# And fortunately yes :
+Feitian Technologies, Inc. SC Reader KP382
+
+# Then a quick check of the pcscd is running :
+sudo systemctl status pcscd
+
+# Well it stopped I don't know why, maybe because I quit the terminal
+# I restarted it with :
+sudo systemctl start pcscd
+
+# And rechecked : Yeah it ran :
+sudo systemctl status pcscd
+sudo systemctl enable pcscd
+
+# After that to make the reader receive any NFC TAG I had to use some tool or let's say a command called pcsc_scan, I tried it but it did not work, I had to install the tools first 
+
+sudo apt-get install -y pcsc-tools
+
+# After installing the tools I went to test it
+pcsc_scan
+
+# And : Et voila
+
+	Tue Mar 31 14:43:32 2026
+	 Reader 0: Feitian 502-CL [NFC   ] (7469992538127-55450484) 00 00
+	  Event number: 1
+	  Card state: Card inserted, 
+	  ATR: 3B 8F 80 01 80 4F 0C A0 00 00 03 06 03 00 3D 00 00 00 00 56
+
+	ATR: 3B 8F 80 01 80 4F 0C A0 00 00 03 06 03 00 3D 00 00 00 00 56
+	+ TS = 3B --> Direct Convention
+	+ T0 = 8F, Y(1): 1000, K: 15 (historical bytes)
+	  TD(1) = 80 --> Y(i+1) = 1000, Protocol T = 0 
+	-----
+	  TD(2) = 01 --> Y(i+1) = 0000, Protocol T = 1 
+	-----
+	+ Historical bytes: 80 4F 0C A0 00 00 03 06 03 00 3D 00 00 00 00
+	  Category indicator byte: 80 (compact TLV data object)
+	    Tag: 4, len: F (initial access data)
+	      Initial access data: 0C A0 00 00 03 06 03 00 3D 00 00 00 00
+	+ TCK = 56 (correct checksum)
+
+	Possibly identified card (using /usr/share/pcsc/smartcard_list.txt):
+	3B 8F 80 01 80 4F 0C A0 00 00 03 06 03 00 3D 00 00 00 00 56
+	3B 8F 80 01 80 4F 0C A0 00 00 03 06 .. 00 3D 00 00 00 00 ..
+		MIFARE Ultralight EV1 (as per PCSC std part3)
+	3B 8F 80 01 80 4F 0C A0 00 00 03 06 03 00 3D 00 00 00 00 56
+	3B 8F 80 01 80 4F 0C A0 00 00 03 06 03 .. .. 00 00 00 00 ..
+		RFID - ISO 14443 Type A Part 3 (as per PCSC std part3)
+
+	   
+	Tue Mar 31 14:43:33 2026
+	 Reader 0: Feitian 502-CL [NFC   ] (7469992538127-55450484) 00 00
+	  Event number: 2
+	  Card state: Card removed, 
+
+# Now that everything seems working, Let's start coding :), Well to start I will create the functions that interacts with the database ;)
+
+# First function would be the initialization of the database : This function will create the product table only if does not exist, other way it only connects to the database to confirm the existence (At the end the table would only be a mapping table that maps every NFC_tag to the corresponding product but now we have to work on everything as if I have only this table (we'll see next), we always commit at the end and close the connection.
+
+init_db()
+
+# Second function would be the add product function : This function take a data class Product as parameter, it connects to the database and add the product if it does not exist, if it exist it returns an exception, we always commit and close the connection.
+
+add_product(product: Product)
+
+# Third function would be the get product function : This function takes in parameter the NFC_tag, connects to the database and search for the product, if the product exists the function returns it, if the product does not exist None will be returned, the connection must always be closed at the end.
+
+get_product(nfc_tag: str) -> Optional[Product]
+
+# Fourth function would be the update product function : This function takes the NFC_tag and the quantity to be taken from inventory and checks if the stock is sufficient or need a restock, if it('s sufficient the quantity is updated along with the modification date field, else it return False.
+
+def update_quantity(nfc_tag : str, quantity_picked : int) -> bool:
+
+# Fifth function would be the restock product function : This function takes the NFC_tag and the quantity to restock into inventory, it first checks if the product exist in database, if not it returns False, but if it finds it the quantity is updated and the modification date is updated too.
+
+def restock_product(nfc_tag : str, qunatity_added: int) -> bool:
+
+# Sixth function would be the print function : This function takes a product as entry, and prints it in a readable format if it exist in the database; if it does not then it will print that there is no product to display.
+
+def print_product(product: Product):
+
+# Seventh function would be the most important one, it's the NFC read function : Well as it is now it does not do great things for the moment it just read the NFC tag from the reader using the reader from smart-card library, so the reader is always waiting for a tag to be scanned, during this time the function print waiting to notify the user that the reader is working and waiting for a NFC tag to be approached.
+# To understand more about how it works, check out the ATR and APDU for smart-card terminology.
+
+def read_nfc_tag():
+
+# Eighth function would be the input with timeout function : Well it use a thread, and prompts the user to fill the input within a timeout which is for the moment 30s. If there is a tag detected it proceed to the next iteration, otherwise it just show no response after the timeout and so it goes sleeping and exists. This function must work cross platform, first I was using the select.select() but unfortunately it does not work on windows but only on Linux/MacOs. After some research there were a lot of usable solution like sub process or a thread using 1 or 2 libraries that I do not know about, and so I preferred the simplest approach.
+
+def input_with_timeout(prompt: str, timeout: int = 30) -> str:
+
+# Ninth function would be the parse date function : This function assures that every date that is passed is of the format YYYY-MM-DD, it demands the user to retry until it's valid.
+
+def parse_date(prompt: str) -> str:
+
+# Tenth function would be the parse int function : This function assures that every valued entered for quantity is an integer and nothing else, it demands the user to retry until it's valid.
+
+def parse_int(prompt: str) -> int:
+
+# Eleventh function would be the handle NFC interaction function : This function checks if the Tag (product) exists in database, if it exist the function demand which action the user want to perform picking or restocking, if none of them is chosen it just prints the product information's, otherwise if the product dos not exist it asks the user if he want to register a new product with this tag, if yes the user must enter product information's, otherwise it's just a canceled registration.
+
+def handle_nfc_interaction(nfc_tag: str):
+
+# Last is main where we will be running everything : It contains a while loop that to repetitively check for the NFC tag with a timer. Once this timer is reached It exits (turn off), if a tag is approached we handle the interaction and exit at the end. This logic is here to assure not consuming a lot of CPU or having the program running endlessly. 
