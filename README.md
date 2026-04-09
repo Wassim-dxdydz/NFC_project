@@ -133,19 +133,6 @@ pyscard
 
 ---
 
-## 🛡️ Security & Privacy Notes
-
-- The `.gitignore` file ensures that:
-  - `nfc_products.db` (local database)
-  - `venv/` (virtual environment)
-  - `__pycache__/` (Python cache)
-
-are **not uploaded** to your repository.
-
-This keeps your inventory data private and your repository clean.
-
----
-
 ## ✅ Summary
 
 This project enables:
