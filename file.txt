@@ -1,0 +1,168 @@
+🧠 What you actually want (clean architecture)
+
+You want:
+
+NFC scan → plugin endpoint → resolve UID → return action (view / pick / restock / register)
+
+NOT:
+
+BarcodeMixin → scan() override
+🚨 First correction (important)
+
+You should REMOVE this:
+
+from plugin.mixins import BarcodeMixin
+
+and change:
+
+class NFCDrugPlugin(BarcodeMixin, SettingsMixin, InvenTreePlugin):
+
+👉 to:
+
+from plugin import InvenTreePlugin
+from plugin.mixins import SettingsMixin, UrlsMixin, ActionMixin, NavigationMixin
+✅ STEP 1 — Correct plugin base
+
+Start like this:
+
+class NFCDrugPlugin(SettingsMixin, UrlsMixin, ActionMixin, NavigationMixin, InvenTreePlugin):
+🧠 Why these mixins?
+Mixin	Purpose
+SettingsMixin	config (timeout etc.)
+UrlsMixin	create /api/nfc/... endpoints
+ActionMixin	trigger stock actions (pick/restock)
+NavigationMixin	add UI menu
+InvenTreePlugin	base plugin
+✅ STEP 2 — Create NFC API endpoint (CORE)
+
+Create a file:
+
+nfc_api.py
+Example:
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from stock.models import StockItem
+
+@api_view(['POST'])
+def nfc_scan(request):
+    uid = request.data.get("uid", "").strip().upper()
+
+    item = StockItem.objects.filter(metadata__nfc_tag=uid).first()
+
+    if not item:
+        return Response({
+            "status": "not_found",
+            "uid": uid,
+            "action": "register"
+        })
+
+    return Response({
+        "status": "found",
+        "item_id": item.pk,
+        "actions": ["view", "pick", "restock"]
+    })
+✅ STEP 3 — Register URL in plugin
+
+In your plugin class:
+
+def setup_urls(self):
+    from django.urls import path
+    from .nfc_api import nfc_scan
+
+    return [
+        path("scan/", nfc_scan),
+    ]
+
+👉 This gives:
+
+/api/plugin/nfc_drug/scan/
+❌ STEP 4 — REMOVE barcode logic completely
+
+Delete this:
+
+def scan(self, barcode_data):
+
+👉 You are no longer using barcode system.
+
+🧠 STEP 5 — Use metadata correctly (good job here 👍)
+
+This part is correct:
+
+StockItem.objects.filter(metadata__nfc_tag=uid)
+
+✔ That is exactly how NFC tagging should work in InvenTree
+
+⚙️ STEP 6 — Add ACTIONS (this is where ActionMixin comes in)
+
+You define actions like:
+
+def get_actions(self):
+    return {
+        "pick": {
+            "label": "Pick Stock",
+            "action": self.pick_stock,
+        },
+        "restock": {
+            "label": "Restock",
+            "action": self.restock_stock,
+        }
+    }
+Example implementation:
+def pick_stock(self, item_id, quantity=1):
+    item = StockItem.objects.get(pk=item_id)
+    item.quantity -= quantity
+    item.save()
+🧭 STEP 7 — Add UI entry (NavigationMixin)
+def get_ui_urls(self):
+    return [
+        {
+            "name": "NFC Scanner",
+            "link": "/plugin/nfc-drug/",
+        }
+    ]
+🔥 FINAL ARCHITECTURE YOU SHOULD HAVE
+NFC Reader (Python)
+        ↓
+POST /api/plugin/nfc_drug/scan/
+        ↓
+Plugin resolves UID
+        ↓
+Returns:
+    - found → actions (view/pick/restock)
+    - not found → register prompt
+        ↓
+Frontend executes ActionMixin logic
+⚠️ BIG MISTAKE TO AVOID
+
+Do NOT:
+
+❌ override BarcodeMixin
+❌ reuse scan()
+❌ treat NFC like barcode
+
+👉 NFC is a request/response system, not a scanner stream
+
+🧩 STEP 8 — What you already did right
+
+✔ metadata approach
+✔ StockItem linking
+✔ plugin enabled in admin
+✔ docker + caddy setup
+
+You’re already 70% there.
+
+🚀 NEXT STEP (I recommend)
+
+If you want, I can help you:
+
+1. Build full NFC flow UI in InvenTree frontend
+auto popup on scan
+instant stock action buttons
+2. Connect your Python NFC reader properly
+real-time scan → API → UI update
+3. Make it production-grade plugin
+permissions
+logging
+audit trail
+
+Just tell me 👍
