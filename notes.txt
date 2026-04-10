@@ -1,0 +1,17 @@
+#Some usefull things to know about python and its ecosystem
+
+https://github.com/BurntSushi/ripgrep
+https://github.com/sharkdp/bat
+https://github.com/sharkdp/hyperfine
+https://www.maturin.rs/
+https://github.com/biomejs/biome
+https://github.com/PrefectHQ/prefect/
+better than pip ???? : https://github.com/astral-sh/uv
+https://docs.astral.sh/ty/
+https://docs.astral.sh/ruff/
+
+https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.acs.com.hk/download-manual/939/API_ACR128.pdf&ved=2ahUKEwjP9YjV9cyTAxUtUaQEHb6tHGoQFnoECB4QAQ&usg=AOvVaw01oJIRuq51zcwYTf7psXkw
+
+
+
+
