@@ -6,7 +6,8 @@ from smartcard.System import readers
 from smartcard.util import toHexString
 from smartcard.Exceptions import NoCardException, CardConnectionException
 import logging
-from database import Product, add_product, get_product, print_product, restock_product, update_quantity
+from database import Product, init_db, add_product, get_product, update_quantity, restock_product, print_product
+#from psqldb import Product, add_product, get_product, print_product, restock_product, update_quantity
 
 GET_UID = [0xFF, 0xCA, 0x00, 0x00, 0x00]
 _MISSING_READER_WARN_INTERVAL = 10

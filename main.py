@@ -1,5 +1,6 @@
 import logging
 from database import Product, init_db, add_product, get_product, update_quantity, restock_product, print_product
+#from psqldb import Product, init_db, add_product, get_product, update_quantity, restock_product, print_product
 from nfc_reader_writer import handle_nfc_interaction, read_nfc_tag
 import time
 
