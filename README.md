@@ -116,6 +116,7 @@ nfc_project/
 │
 ├── main.py                  # Entry point (app loop + scanning timeout)
 ├── database.py              # Product dataclass + SQLite CRUD operations
+├── psqldb.py                # Product dataclass + PostgreSQL CRUD operations
 ├── nfc_reader_writer.py     # NFC hardware communication + logic
 ├── requirements.txt         # Project dependencies
 └── .gitignore               # Ignored files (venv, DB, cache)
