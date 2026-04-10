@@ -166,3 +166,14 @@ logging
 audit trail
 
 Just tell me 👍
+
+💡 NEXT STEP (if you want real power)
+
+I can help you add:
+
+🔥 1. Real-time NFC scanner (no refresh)
+WebSocket updates
+instant UI popup
+🔥 2. Auto-open stock item page on scan
+🔥 3. “Register new NFC tag” workflow
+🔥 4. Secure NFC authentication layer
