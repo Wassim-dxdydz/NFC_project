@@ -195,4 +195,89 @@ def parse_int(prompt: str) -> int:
 
 def handle_nfc_interaction(nfc_tag: str):
 
-# Last is main where we will be running everything : It contains a while loop that to repetitively check for the NFC tag with a timer. Once this timer is reached It exits (turn off), if a tag is approached we handle the interaction and exit at the end. This logic is here to assure not consuming a lot of CPU or having the program running endlessly. 
+# Last is main where we will be running everything : It contains a while loop that repetitively check for the NFC tag with a timer. Once this timer is reached It exits (turn off), if a tag is approached we handle the interaction and exit at the end. This logic is here to assure not consuming a lot of CPU or having the program running endlessly.
+
+main()
+
+# Another thing I wanted to add is the setup.sh file which will install everything needed for the project to work on any machine, will will initialize the virtual environment and install all the dependencies. This will automate everything rather than telling the user what to write on the terminal step by step, I think it would be better if he ran one or two commands rather than 10.
+
+Before running it do chmod +x setup.sh and then ./setup.sh
+
+Work's Done ✅✅✅✅✅✅
+What to do now ? 
+Let's go for inventree documentation and see what do we need so we can integrate these functions inside it.
+
+# Well after reading the documentation, the core mixins I will most likely use are BarcodeMixin, EventMixin, SettingsMixin, UserInterfaceMixin and maybe UrlsMixin and LocateMixin.
+	- BarcodeMixin : This one would be used to read the NFC tag, Inventree documentation explicitly frames bar code plugins as the extension point for custom scanned codes and supplier/product identification. In simple words reads a scanned NFC tag and resolve it to a drug / stock item.
+	- EventMixin : This one would be used for reacting to a stock item (or as it is said in the documentation "Part") when it's created or updated, this one would simplify the linking between a stock item and the NFC tag scanned. In simple words it auto-links a newly created stock item after the scan/write flow.
+	- SettingsMixin : This one would be used for storing the configuration and rules, maybe how the reader behave, or the mapping strategy, the tag formats...
+	- UserInterfaceMixin / UrlsMixin : This one would be used to add a custom server-side UI hooks or dedicated plugin endpoints inside InvenTree itself. In simple words add a custom UI widgets/pages inside InvenTree and expose endpoints for React.
+	- LocateMixin : Physically locate tagged stock in a custom way.
+
+# So the final app architecture would be:
+	- InvenTree backend plugin in Django : It uses the previous Mixin in its implementation.
+	- React frontend : This one would handle the NFC reader interaction in the browser or some kind of local-bridge, and communicate with the backend to search, create, update stock records.
+	- PostgreSQL database : It's the main database for InvenTree and the plugin.
+
+
+# After long reading and understanding of how the BarcodeMixin works, I think we will be going to use ActionMixin rather than BarcodeMixin since this last one use keyboard to write the barcode or just scan for it as an image, there nothing that reassembles to NFC reader like reading a tag directly !! There is always a user intervention either by writing something or searching for it, our NFC solution must be something simple where the user only place the tag and approach it from the reader and then we handle the interaction and prompt him for multiple actions. The barcode approach is kind of slow for NFC.
+
+
+# Now we attack the inventree project so first i created a project with inventree all above and then i started to try to work on a plugin inside it but after a lot of tries, ups and downs I figured that the project that i used was just intended to show how inventree work and not exactly to develop a plugin or something like this (this costs me 2 days and a half to figure it out) and then i focused for a day or two on the documentation and read it well just so I won't do the same error. Now i forked the project into my repository and then cloned it to start the work:
+
+git clone https://github.com/Wassim-dxdydz/InvenTree.git
+cd Inventree
+code .
+
+# Now I need to setup the dev container, well it's easy :
+
+Ctrl + shift + P : Reopen in Container -> This will pull and build three Docker containers: inventree(server), database(PostgreSQL) and redis(cache)
+
+# When it's done after a few minutes a venv tag would appear if it doesn't use this :
+
+source /home/inventree/dev/venv/bin/activate
+
+# After that inventree propose demo dataset:
+
+Ctrl + Shift + P -> Run Task -> setup.test / test
+
+# Then run the server :
+
+Ctrl + Shift + D : run with debug 
+invoke dev.server
+
+# Now that everything is set-up we install the plugin creator tool :
+
+pip install inventree-plugin-creator
+
+# Create the plugin 
+
+create-inventree-plugin : and then answer the questions (plugin_name)
+
+# Install the plugin:
+
+pip install -e path/plugin_name (chosen_above)
+pip show inventree-plugin_name : to check if it worked
+
+# Now that everything is done we re-run the server:
+
+user : admin
+password :  inventree
+
+# We navigate to Admin center -> Plugins -> search for the plugin -> Activate
+# Now we build the frontend :
+
+cd path/plugin_name/frontend
+npm install
+---- npm run dev (this one start a preview server so it does not create the files inventree needs and so the correct approach is to use npm run build)
+npm run build
+
+# The difference is that npm run dev is a live preview on port 5174 for frontend development only while npm run build compiles js into nfc/static/ so that inventree can serve it. So to make it simple run dev let you see the changes instantly but this will resolve on an error inside inventree since inventree search for js files inside static but can't afford them, and so run build assure these compiled js files exist inside static [this make things a little bit difficult since at each change you make you should build and rerun the server to see the changes (or just npm run build and refresh)]
+
+# Well now we have done approximately everything needed and now we must write the code that will let us use the nfc inside inventree, and since I already done that above in a separate test project everything should be easy now we just need to put things up 
+
+# First i needed to install what was missing since it's a new container
+
+sudo apt install gh -y : this is for github login and logout
+sudo apt-get update && sudo apt-get install -y libpcsclite-dev pcscd pcsc-tools
+pip install pyscard
