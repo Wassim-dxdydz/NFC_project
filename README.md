@@ -9,7 +9,7 @@ A Python application designed to track and manage product stock using NFC tags. 
 - **Automated Scanning**: Detects NFC tags and retrieves their Unique ID (UID).
 - **Product Registration**: Register new items with descriptions, dates, and quantities.
 - **Stock Control**: Quick "Update" (remove) or "Restock" (add) functions via terminal.
-- **Data Persistence**: Uses a local SQLite database to store all product history.
+- **Data Persistence**: Uses a local SQLite (or PostgreSQL) database to store all product history.
 - **Visual Feedback**: Cleanly formatted console output for product details and stock status.
 
 ---
