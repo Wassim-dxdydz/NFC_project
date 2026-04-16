@@ -28,9 +28,31 @@ class Product:
     created_at: Optional[str] = None
     modified_at: Optional[str] = None
     id: Optional[int] = None
-
+    
 def get_connection():
     return psycopg.connect(**DB_CONFIG, row_factory=dict_row)
+
+def create_database():
+    dbname = DB_CONFIG["dbname"]
+
+    # connect to default postgres DB
+    temp_config = DB_CONFIG.copy()
+    temp_config["dbname"] = "postgres"
+
+    with psycopg.connect(**temp_config) as conn:
+        conn.autocommit = True
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT 1 FROM pg_database WHERE datname = %s",
+                (dbname,)
+            )
+            exists = cur.fetchone()
+
+            if not exists:
+                cur.execute(f'CREATE DATABASE "{dbname}"')
+                print(f"Database '{dbname}' created")
+            else:
+                print(f"Database '{dbname}' already exists")
 
 def init_db():
     '''
@@ -56,6 +78,10 @@ def init_db():
             ''')
         connection.commit()
     print("Done\n")
+
+def setup():
+    create_database()
+    init_db()
 
 def add_product(product : Product):
     '''
@@ -93,17 +119,17 @@ def get_product(nfc_tag: str) -> Optional[Product]:
     if row is None:
         return None
     return Product(
-        id=row[0],
-        nfc_tag=row[1],
-        name=row[2],
-        description=row[3],
-        production_date=row[4],
-        expiration_date=row[5],
-        other_infos=row[6],
-        quantity=row[7],
-        is_out=row[8],
-        created_at=row[9],
-        modified_at=row[10]
+        id=row["id"],
+        nfc_tag=row["nfc_tag"],
+        name=row["nom"],
+        description=row["description"],
+        production_date=row["date_de_fabrication"],
+        expiration_date=row["date_d_expiration"],
+        other_infos=row["autres_infos"],
+        quantity=row["quantite"],
+        is_out=row["sortie"],
+        created_at=row["date_de_creation"],
+        modified_at=row["date_de_modification"]
     )
 
 def update_quantity(nfc_tag : str, quantity_picked : int) -> bool:
