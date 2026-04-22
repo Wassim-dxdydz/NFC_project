@@ -22,7 +22,7 @@ Before you begin, ensure you have the following:
    👉 https://www.python.org/downloads/
 
 2. **NFC Reader**  
-   A PC/SC compatible reader (e.g., ACR122U)
+   A PC/SC compatible reader (e.g., ACR122U), The one used by me is the [Cryptnox NFC Contactless Reader](https://shop.cryptnox.com/product/cryptnox-contactless-reader/)
 
 3. **System Drivers (Linux/Debian)**  
    Required for the `pyscard` library to communicate with the USB reader:
